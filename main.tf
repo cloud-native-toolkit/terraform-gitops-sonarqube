@@ -137,19 +137,6 @@ resource null_resource setup_chart {
   }
 }
 
-resource null_resource setup_gitops {
-  depends_on = [null_resource.setup_chart]
-
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/setup-gitops.sh '${local.name}' '${local.chart_dir}' '${local.path}' '${local.application_branch}' '${var.namespace}'"
-
-    environment = {
-      GIT_CREDENTIALS = jsonencode(var.git_credentials)
-      GITOPS_CONFIG = jsonencode(local.layer_config)
-    }
-  }
-}
-
 module "service_account" {
   source = "github.com/cloud-native-toolkit/terraform-gitops-service-account"
 
@@ -158,4 +145,17 @@ module "service_account" {
   namespace = var.namespace
   name = var.service_account_name
   sccs = ["anyuid", "privileged"]
+}
+
+resource null_resource setup_gitops {
+  depends_on = [null_resource.setup_chart,module.service_account]
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/setup-gitops.sh '${local.name}' '${local.chart_dir}' '${local.path}' '${local.application_branch}' '${var.namespace}'"
+
+    environment = {
+      GIT_CREDENTIALS = jsonencode(nonsensitive(var.git_credentials))
+      GITOPS_CONFIG = jsonencode(local.layer_config)
+    }
+  }
 }
