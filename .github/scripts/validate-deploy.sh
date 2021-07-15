@@ -29,5 +29,10 @@ fi
 
 cat payload/2-services/sonarqube/values.yaml
 
+if [[ -f "payload/2-services/sonarqube/templates/sonarqube-access.yaml" ]]; then
+  echo "Found sealed secret file"
+  cat "payload/2-services/sonarqube/templates/sonarqube-access.yaml"
+fi
+
 cd ..
 rm -rf .testrepo

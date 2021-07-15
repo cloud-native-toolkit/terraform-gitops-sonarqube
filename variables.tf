@@ -130,3 +130,9 @@ variable "hostname" {
   description = "The hostname that will be used for the ingress/route"
   default     = "sonarqube"
 }
+
+variable "kubeseal_cert" {
+  type        = string
+  description = "The certificate/public key used to encrypt the sealed secrets"
+  default     = ""
+}
