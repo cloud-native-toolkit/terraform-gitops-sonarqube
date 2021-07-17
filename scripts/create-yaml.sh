@@ -54,7 +54,13 @@ EOL
     KUBESEAL="${BIN_DIR}/kubeseal"
   fi
 
+  echo "Kubeseal cert"
+  cat "${KUBESEAL_CERT_FILE}"
+
   ${KUBESEAL} --cert "${KUBESEAL_CERT_FILE}" --format yaml < "${SECRET_FILE}" > "${TEMPLATE_DIR}/sonarqube-access.yaml"
+
+  echo "Sealed secret"
+  cat "${TEMPLATE_DIR}/sonarqube-access.yaml"
 fi
 
 find "${DEST_DIR}" -name "*"
