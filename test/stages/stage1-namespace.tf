@@ -7,3 +7,9 @@ module "gitops_namespace" {
   argocd_namespace = "openshift-gitops"
   argocd_service_account      = "argocd-cluster-argocd-application-controller"
 }
+
+resource null_resource write_namespace {
+  provisioner "local-exec" {
+    command = "echo -n '${module.gitops_namespace.name}' > .namespace"
+  }
+}

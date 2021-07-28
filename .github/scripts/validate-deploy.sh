@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+export KUBECONFIG=$(cat .kubeconfig)
+NAMESPACE=$(cat .namespace)
+
 GIT_REPO=$(cat git_repo)
 GIT_TOKEN=$(cat git_token)
 
@@ -36,3 +39,7 @@ fi
 
 cd ..
 rm -rf .testrepo
+
+kubectl get secret -n "${NAMESPACE}" sonarqube-access || exit 1
+
+oc extract "secret/${NAMESPACE}" -n "${NAMESPACE}" --to=-
