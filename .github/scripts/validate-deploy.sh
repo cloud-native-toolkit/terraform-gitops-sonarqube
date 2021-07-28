@@ -40,6 +40,13 @@ fi
 cd ..
 rm -rf .testrepo
 
+count=0
+until kubectl get namespace "${NAMESPACE}" 1> /dev/null 2> /dev/null || [[ $count -eq 20 ]]; do
+  echo "Waiting for namespace: ${NAMESPACE}"
+  count=$((count + 1))
+  sleep 15
+done
+
 kubectl get secret -n "${NAMESPACE}" sonarqube-access || exit 1
 
 oc extract "secret/${NAMESPACE}" -n "${NAMESPACE}" --to=-
