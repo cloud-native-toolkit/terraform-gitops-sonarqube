@@ -134,7 +134,7 @@ module "service_account" {
 }
 
 resource null_resource setup_gitops {
-  depends_on = [null_resource.setup_chart,module.service_account]
+  depends_on = [null_resource.setup_chart, module.service_account]
 
   provisioner "local-exec" {
     command = "${path.module}/scripts/setup-gitops.sh '${local.name}' '${local.chart_dir}' '${local.path}' '${local.application_branch}' '${var.namespace}'"

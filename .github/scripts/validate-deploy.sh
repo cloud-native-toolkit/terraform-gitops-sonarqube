@@ -47,6 +47,29 @@ until kubectl get namespace "${NAMESPACE}" 1> /dev/null 2> /dev/null || [[ $coun
   sleep 15
 done
 
+if [[ $count -eq 20 ]]; then
+  echo "Timed out waiting for namespace: ${NAMESPACE}"
+  exit 1
+else
+  echo "Found namespace: ${NAMESPACE}. Sleeping for 30 seconds to wait for everything to settle down"
+  sleep 30
+fi
+
+
+count=0
+until kubectl get secret -n "${NAMESPACE}" sonarqube-access 1> /dev/null 2> /dev/null || [[ $count -eq 20 ]]; do
+  echo "Waiting for secret in ${NAMESPACE}: sonarqube-access"
+  count=$((count + 1))
+  sleep 15
+done
+
+kubectl get all -n "${NAMESPACE}"
+
+if [[ $count -eq 20 ]]; then
+  echo "Timed out waiting for secret in ${NAMESPACE}: sonarqube-access"
+  exit 1
+fi
+
 kubectl get secret -n "${NAMESPACE}" sonarqube-access || exit 1
 
 oc extract "secret/${NAMESPACE}" -n "${NAMESPACE}" --to=-
