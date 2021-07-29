@@ -64,6 +64,7 @@ until kubectl get secret -n "${NAMESPACE}" sonarqube-access 1> /dev/null 2> /dev
 done
 
 kubectl get all -n "${NAMESPACE}"
+kubectl describe sealedsecret -n "${NAMESPACE}"
 
 if [[ $count -eq 20 ]]; then
   echo "Timed out waiting for secret in ${NAMESPACE}: sonarqube-access"
