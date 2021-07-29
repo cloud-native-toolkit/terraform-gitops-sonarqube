@@ -5,6 +5,7 @@ MODULE_DIR=$(cd "${SCRIPT_DIR}/.."; pwd -P)
 
 DEST_DIR="$1"
 SERVICE_URL="$2"
+NAMESPACE="$3"
 
 mkdir -p "${DEST_DIR}"
 
@@ -32,6 +33,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: sonarqube-access
+  namespace: ${NAMESPACE}
   labels:
     app.kubernetes.io/part-of: sonarqube
     app: sonarqube

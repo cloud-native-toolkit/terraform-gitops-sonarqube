@@ -112,7 +112,7 @@ locals {
 
 resource null_resource setup_chart {
   provisioner "local-exec" {
-    command = "${path.module}/scripts/create-yaml.sh '${local.chart_dir}' '${local.service_url}'"
+    command = "${path.module}/scripts/create-yaml.sh '${local.chart_dir}' '${local.service_url}' '${var.namespace}'"
 
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
