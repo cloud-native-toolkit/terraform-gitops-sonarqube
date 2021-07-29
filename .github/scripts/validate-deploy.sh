@@ -73,4 +73,4 @@ fi
 
 kubectl get secret -n "${NAMESPACE}" sonarqube-access || exit 1
 
-oc extract "secret/${NAMESPACE}" -n "${NAMESPACE}" --to=-
+oc extract secret/sonarqube-access -n "${NAMESPACE}" --to=-
