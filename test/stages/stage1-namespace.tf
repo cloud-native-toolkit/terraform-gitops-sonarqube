@@ -6,6 +6,7 @@ module "gitops_namespace" {
   name = var.namespace
   argocd_namespace       = module.argocd-bootstrap.argocd_namespace
   argocd_service_account = module.argocd-bootstrap.argocd_service_account
+  server_name              = module.gitops.server_name
 }
 
 resource null_resource write_namespace {

@@ -1,9 +1,11 @@
 locals {
+  bin_dir = "${path.cwd}/bin"
   tmp_dir      = "${path.cwd}/.tmp/sonarqube"
-  chart_dir    = "${local.tmp_dir}/chart/sonarqube"
+  yaml_dir    = "${local.tmp_dir}/chart/sonarqube"
   ingress_host = "${var.hostname}-${var.namespace}.${var.cluster_ingress_hostname}"
   ingress_url  = "https://${local.ingress_host}"
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
+  values_file = "values-${var.server_name}.yaml"
 
   layer = "services"
   application_branch = "main"
@@ -110,9 +112,21 @@ locals {
   }
 }
 
-resource null_resource setup_chart {
+resource null_resource setup_binaries {
   provisioner "local-exec" {
-    command = "${path.module}/scripts/create-yaml.sh '${local.chart_dir}' '${local.service_url}' '${var.namespace}'"
+    command = "${path.module}/scripts/setup-binaries.sh"
+
+    environment = {
+      BIN_DIR = local.bin_dir
+    }
+  }
+}
+
+resource null_resource setup_chart {
+  depends_on = [null_resource.setup_binaries]
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/create-yaml.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
 
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
@@ -131,17 +145,18 @@ module "service_account" {
   namespace = var.namespace
   name = var.service_account_name
   sccs = ["anyuid", "privileged"]
+  server_name = var.server_name
 }
 
 resource null_resource setup_gitops {
   depends_on = [null_resource.setup_chart, module.service_account]
 
   provisioner "local-exec" {
-    command = "${path.module}/scripts/setup-gitops.sh '${local.name}' '${local.chart_dir}' '${local.path}' '${local.application_branch}' '${var.namespace}'"
+    command = "$(command -v igc || command -v ${local.bin_dir}/igc) gitops-module '${local.name}' -n '${var.namespace}' --contentDir '${local.yaml_dir}' --serverName '${var.server_name}' -l '${local.layer}' --valueFiles 'values.yaml,${local.values_file}'"
 
     environment = {
-      GIT_CREDENTIALS = jsonencode(var.git_credentials)
-      GITOPS_CONFIG = jsonencode(local.layer_config)
+      GIT_CREDENTIALS = yamlencode(var.git_credentials)
+      GITOPS_CONFIG   = yamlencode(var.gitops_config)
     }
   }
 }

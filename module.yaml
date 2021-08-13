@@ -43,6 +43,10 @@ versions:
         moduleRef:
           id: gitops
           output: git_credentials
+      - name: server_name
+        moduleRef:
+          id: gitops
+          output: server_name
       - name: cluster_type
         moduleRef:
           id: cluster
