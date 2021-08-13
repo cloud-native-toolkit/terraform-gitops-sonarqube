@@ -18,13 +18,13 @@ cd .testrepo || exit 1
 
 find . -name "*"
 
-if [[ ! -f "argocd/2-services/cluster/${SERVER_NAME}/base/${NAME}.yaml" ]]; then
-  echo "ArgoCD config missing - argocd/2-services/cluster/${SERVER_NAME}/base/${NAME}.yaml"
+if [[ ! -f "argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml" ]]; then
+  echo "ArgoCD config missing - argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
   exit 1
 fi
 
-echo "Argocd config - argocd/2-services/cluster/${SERVER_NAME}/base/${NAME}.yaml"
-cat "argocd/2-services/cluster/${SERVER_NAME}/base/${NAME}.yaml"
+echo "Argocd config - argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
+cat "argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
 
 if [[ ! -f "payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml" ]]; then
   echo "Application values not found - payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
