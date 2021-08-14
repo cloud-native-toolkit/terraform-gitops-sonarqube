@@ -131,6 +131,12 @@ variable "hostname" {
   default     = "sonarqube"
 }
 
+variable "persistence" {
+  type        = bool
+  description = "Flag indicating that persistence should be enabled for the pods"
+  default     = false
+}
+
 variable "kubeseal_cert" {
   type        = string
   description = "The certificate/public key used to encrypt the sealed secrets"
