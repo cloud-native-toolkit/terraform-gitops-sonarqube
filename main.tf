@@ -25,7 +25,6 @@ locals {
     }
     persistence = {
       enabled = false
-      storageClass = var.storage_class
     }
     serviceAccount = {
       create = false
@@ -33,6 +32,51 @@ locals {
     }
     podLabels = {
       "app.kubernetes.io/part-of" = "sonarqube"
+    }
+    postgresql = {
+      enabled = true
+      postgresqlServer = ""
+      postgresqlDatabase = "sonarDB"
+      postgresqlUsername = "sonarUser"
+      postgresqlPassword = "sonarPass"
+      service = {
+        port = 5432
+      }
+      serviceAccount = {
+        enabled = false
+        name = var.service_account_name
+      }
+      persistence = {
+        enabled = false
+      }
+      volumePermissions = {
+        enabled = false
+      }
+      master = {
+        labels = {
+          "app.kubernetes.io/part-of" = "sonarqube"
+        }
+        podLabels = {
+          "app.kubernetes.io/part-of" = "sonarqube"
+        }
+      }
+    }
+    ingress = {
+      enabled = false
+    }
+    plugins = {
+      install = var.plugins
+    }
+    enableTests = false
+    OpenShift = {
+      enabled = true
+      createSCC = false
+    }
+  }
+  sonarqube_server_config = {
+    persistence = {
+      enabled = var.persistence
+      storageClass = var.storage_class
     }
     postgresql = {
       enabled = !var.postgresql.external
@@ -48,19 +92,8 @@ locals {
         name = var.service_account_name
       }
       persistence = {
-        enabled = false
+        enabled = var.persistence
         storageClass = var.storage_class
-      }
-      volumePermissions = {
-        enabled = false
-      }
-      master = {
-        labels = {
-          "app.kubernetes.io/part-of" = "sonarqube"
-        }
-        podLabels = {
-          "app.kubernetes.io/part-of" = "sonarqube"
-        }
       }
     }
     ingress = {
@@ -81,12 +114,8 @@ locals {
         ]
       }]
     }
-    plugins = {
-      install = var.plugins
-    }
-    enableTests = false
     OpenShift = {
-      enabled = true
+      enabled = var.cluster_type != "kubernetes"
       createSCC = false
     }
   }
@@ -106,9 +135,11 @@ locals {
   }
 
   values_content = {
-    global = local.global_config
     sonarqube = local.sonarqube_config
     ocp-route = local.ocp_route_config
+  }
+  values_server_content = {
+    global = local.global_config
   }
 }
 
@@ -130,6 +161,7 @@ resource null_resource setup_chart {
 
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
+      VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
       KUBESEAL_CERT = var.kubeseal_cert
       ADMIN_PASSWORD = local.admin_password
       TMP_DIR = local.tmp_dir

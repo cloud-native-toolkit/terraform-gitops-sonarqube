@@ -18,6 +18,10 @@ mkdir -p "${TMP_DIR}"
 cp -R "${MODULE_DIR}/chart/sonarqube/"* "${DEST_DIR}"
 
 if [[ -n "${VALUES_CONTENT}" ]]; then
+  echo "${VALUES_CONTENT}" > "${DEST_DIR}/values.yaml"
+fi
+
+if [[ -n "${VALUES_SERVER_CONTENT}" ]] && [[ -n "${VALUES_FILE}" ]]; then
   echo "${VALUES_CONTENT}" > "${DEST_DIR}/${VALUES_FILE}"
 fi
 
