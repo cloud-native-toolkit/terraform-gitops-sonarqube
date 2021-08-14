@@ -6,6 +6,10 @@ NAMESPACE=$(cat .namespace)
 GIT_REPO=$(cat git_repo)
 GIT_TOKEN=$(cat git_token)
 
+NAMESPACE="gitops-sonarqube"
+NAME="sonarqube"
+SERVER_NAME="default"
+
 mkdir -p .testrepo
 
 git clone https://${GIT_TOKEN}@${GIT_REPO} .testrepo
@@ -14,28 +18,29 @@ cd .testrepo || exit 1
 
 find . -name "*"
 
-if [[ ! -f "argocd/2-services/active/sonarqube.yaml" ]]; then
-  echo "ArgoCD config missing"
+if [[ ! -f "argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml" ]]; then
+  echo "ArgoCD config missing - argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
   exit 1
-else
-  echo "ArgoCD config found"
 fi
 
-cat argocd/2-services/active/sonarqube.yaml
+echo "Argocd config - argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
+cat "argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
 
-if [[ ! -f "payload/2-services/sonarqube/values.yaml" ]]; then
-  echo "Application values not found"
+if [[ ! -f "payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml" ]]; then
+  echo "Application values not found - payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
   exit 1
-else
-  echo "Application values found"
 fi
 
-cat payload/2-services/sonarqube/values.yaml
+echo "Payload - payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
+cat "payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
 
-if [[ -f "payload/2-services/sonarqube/templates/sonarqube-access.yaml" ]]; then
-  echo "Found sealed secret file"
-  cat "payload/2-services/sonarqube/templates/sonarqube-access.yaml"
+if [[ ! -f "payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml" ]]; then
+  echo "Sonarqube secret missing - payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml"
+  exit 1
 fi
+
+echo "Sonarqube secret - payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml"
+cat "payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml"
 
 cd ..
 rm -rf .testrepo
