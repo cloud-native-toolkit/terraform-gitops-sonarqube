@@ -22,7 +22,7 @@ if [[ -n "${VALUES_CONTENT}" ]]; then
 fi
 
 if [[ -n "${VALUES_SERVER_CONTENT}" ]] && [[ -n "${VALUES_FILE}" ]]; then
-  echo "${VALUES_CONTENT}" > "${DEST_DIR}/${VALUES_FILE}"
+  echo "${VALUES_SERVER_CONTENT}" > "${DEST_DIR}/${VALUES_FILE}"
 fi
 
 if [[ -n "${KUBESEAL_CERT}" ]]; then
