@@ -162,7 +162,7 @@ resource null_resource setup_chart {
 }
 
 module "service_account" {
-  source = "github.com/cloud-native-toolkit/terraform-gitops-service-account.git"
+  source = "github.com/cloud-native-toolkit/terraform-gitops-service-account.git?ref=debug"
 
   gitops_config = var.gitops_config
   git_credentials = var.git_credentials
@@ -179,7 +179,7 @@ resource null_resource setup_gitops {
     command = "${local.bin_dir}/igc gitops-module '${local.name}' -n '${var.namespace}' --contentDir '${local.yaml_dir}' --serverName '${var.server_name}' -l '${local.layer}' --valueFiles 'values.yaml,${local.values_file}'"
 
     environment = {
-      GIT_CREDENTIALS = yamlencode(var.git_credentials)
+      GIT_CREDENTIALS = yamlencode(nonsensitive(var.git_credentials))
       GITOPS_CONFIG   = yamlencode(var.gitops_config)
     }
   }
