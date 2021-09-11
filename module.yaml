@@ -16,24 +16,13 @@ versions:
           - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
             version: ">= 1.1.0"
       - id: cluster
-        refs:
-          - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-            version: ">= 1.7.0"
-          - source: github.com/ibm-garage-cloud/terraform-ibm-ocp-vpc
-            version: ">= 1.0.0"
-          - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-            version: ">= 2.0.0"
+        refs: []
+        interface: github.com/cloud-native-toolkit/garage-terraform-modules#cluster
+        optional: true
       - id: namespace
         refs:
           - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
             version: ">= 1.0.0"
-      - id: argocd-bootstrap
-        refs:
-          - source: github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
-            version: "> 0.0.0"
-          - source: github.com/cloud-native-toolkit/terraform-vsi-argocd-bootstrap.git
-            version: "> 0.0.0"
-        optional: true
     variables:
       - name: gitops_config
         moduleRef:
@@ -65,5 +54,5 @@ versions:
           output: name
       - name: kubeseal_cert
         moduleRef:
-          id: argocd-bootstrap
+          id: gitops
           output: sealed_secrets_cert
