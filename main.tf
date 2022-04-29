@@ -178,6 +178,29 @@ module "service_account" {
   name = var.service_account_name
   sccs = ["anyuid", "privileged"]
   server_name = var.server_name
+  rbac_rules = [{
+    apiGroups = [""]
+    resources = ["configmaps","endpoints","events","persistentvolumeclaims","pods","secrets","serviceaccounts","services"]
+    verbs = ["*"]
+  },{
+    apiGroups = ["apps"]
+    resources = ["daemonsets","deployments","statefulsets","replicasets"]
+    verbs = ["*"]
+  },{
+    apiGroups = ["apps"]
+    resources = ["deployments/finalizers"]
+    verbs = ["update"]
+  },{
+    apiGroups = ["extensions"]
+    resources = ["deployments"]
+    verbs = ["*"]
+  },{
+    apiGroups = ["security.openshift.io"]
+    resourceNames = ["gitops-sonarqube-sonarqube-sonarqube-anyuid","gitops-sonarqube-sonarqube-sonarqube-privileged"]
+    resources = ["securitycontextconstraints"]
+    verbs = ["use"]
+  }
+  ]
 }
 
 module setup_group_scc {
@@ -196,7 +219,7 @@ module setup_group_scc {
 
 
 resource null_resource setup_gitops {
-  depends_on = [null_resource.setup_chart, module.service_account]
+  depends_on = [null_resource.setup_chart, module.service_account,module.setup_group_scc]
 
   triggers = {
     name = local.name
