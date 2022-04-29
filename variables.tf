@@ -59,6 +59,7 @@ variable "git_credentials" {
     username = string
     token = string
   }))
+  sensitive = true
   description = "The credentials for the gitops repo(s)"
 }
 
@@ -115,14 +116,7 @@ variable "postgresql" {
     external      = bool
   })
   description = "Properties for an existing postgresql database"
-  default     = {
-    username      = ""
-    password      = ""
-    hostname      = ""
-    port          = ""
-    database_name = ""
-    external      = false
-  }
+  default     = null
 }
 
 variable "hostname" {

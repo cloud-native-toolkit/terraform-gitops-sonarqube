@@ -9,7 +9,6 @@ locals {
 
   layer = "services"
   application_branch = "main"
-  layer_config = var.gitops_config[local.layer]
   name = "sonarqube"
   path = "sonarqube"
   admin_password = "admin"
@@ -73,19 +72,28 @@ locals {
       createSCC = false
     }
   }
+  postgresql = var.postgresql != null ? var.postgresql : {
+    username      = "sonarUser"
+    password      = "sonarPass"
+    hostname      = ""
+    port          = 5432
+    database_name = "sonarDB"
+    external      = false
+  }
+  postgresql_external = lookup(local.postgresql, "external", false)
   sonarqube_server_config = {
     persistence = {
       enabled = var.persistence
       storageClass = var.storage_class
     }
     postgresql = {
-      enabled = !var.postgresql.external
-      postgresqlServer = var.postgresql.external ? var.postgresql.hostname : ""
-      postgresqlDatabase = var.postgresql.external ? var.postgresql.database_name : "sonarDB"
-      postgresqlUsername = var.postgresql.external ? var.postgresql.username : "sonarUser"
-      postgresqlPassword = var.postgresql.external ? var.postgresql.password : "sonarPass"
+      enabled = !local.postgresql_external
+      postgresqlServer = lookup(local.postgresql, "hostname", "")
+      postgresqlDatabase = lookup(local.postgresql, "database_name", "sonarDB")
+      postgresqlUsername = lookup(local.postgresql, "username", "sonarUser")
+      postgresqlPassword = lookup(local.postgresql, "password", "sonarPass")
       service = {
-        port = var.postgresql.external ? var.postgresql.port : 5432
+        port = lookup(local.postgresql, "port", 5432)
       }
       serviceAccount = {
         enabled = false
@@ -175,12 +183,34 @@ module "service_account" {
 resource null_resource setup_gitops {
   depends_on = [null_resource.setup_chart, module.service_account]
 
+  triggers = {
+    name = local.name
+    namespace = var.namespace
+    yaml_dir = local.yaml_dir
+    server_name = var.server_name
+    layer = local.layer
+    type = "base"
+    git_credentials = yamlencode(var.git_credentials)
+    gitops_config   = yamlencode(var.gitops_config)
+    bin_dir = local.bin_dir
+  }
+
   provisioner "local-exec" {
-    command = "${local.bin_dir}/igc gitops-module '${local.name}' -n '${var.namespace}' --contentDir '${local.yaml_dir}' --serverName '${var.server_name}' -l '${local.layer}' --valueFiles 'values.yaml,${local.values_file}'"
+    command = "${self.triggers.bin_dir}/igc gitops-module '${self.triggers.name}' -n '${self.triggers.namespace}' --contentDir '${self.triggers.yaml_dir}' --serverName '${self.triggers.server_name}' -l '${self.triggers.layer}' --type '${self.triggers.type}' --cascadingDelete=false"
 
     environment = {
-      GIT_CREDENTIALS = yamlencode(var.git_credentials)
-      GITOPS_CONFIG   = yamlencode(var.gitops_config)
+      GIT_CREDENTIALS = nonsensitive(self.triggers.git_credentials)
+      GITOPS_CONFIG   = self.triggers.gitops_config
+    }
+  }
+
+  provisioner "local-exec" {
+    when = destroy
+    command = "${self.triggers.bin_dir}/igc gitops-module '${self.triggers.name}' -n '${self.triggers.namespace}' --delete --contentDir '${self.triggers.yaml_dir}' --serverName '${self.triggers.server_name}' -l '${self.triggers.layer}' --type '${self.triggers.type}'"
+
+    environment = {
+      GIT_CREDENTIALS = nonsensitive(self.triggers.git_credentials)
+      GITOPS_CONFIG   = self.triggers.gitops_config
     }
   }
 }

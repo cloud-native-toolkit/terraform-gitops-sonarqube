@@ -25,5 +25,5 @@ dependencies:
     version: 9.6.3
     repository: https://oteemo.github.io/charts
   - name: ocp-route
-    version: 0.4.0
+    version: 0.5.0
     repository: https://charts.cloudnativetoolkit.dev

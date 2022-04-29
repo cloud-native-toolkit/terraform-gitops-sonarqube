@@ -1,14 +1,33 @@
 #!/usr/bin/env bash
 
-export KUBECONFIG=$(cat .kubeconfig)
-NAMESPACE=$(cat .namespace)
+SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
 
 GIT_REPO=$(cat git_repo)
 GIT_TOKEN=$(cat git_token)
 
-NAMESPACE="gitops-sonarqube"
-NAME="sonarqube"
-SERVER_NAME="default"
+BIN_DIR=$(cat .bin_dir)
+
+export PATH="${BIN_DIR}:${PATH}"
+
+source "${SCRIPT_DIR}/validation-functions.sh"
+
+if ! command -v oc 1> /dev/null 2> /dev/null; then
+  echo "oc cli not found" >&2
+  exit 1
+fi
+
+if ! command -v kubectl 1> /dev/null 2> /dev/null; then
+  echo "kubectl cli not found" >&2
+  exit 1
+fi
+
+export KUBECONFIG=$(cat .kubeconfig)
+NAMESPACE=$(cat .namespace)
+COMPONENT_NAME=$(jq -r '.name // "my-module"' gitops-output.json)
+BRANCH=$(jq -r '.branch // "main"' gitops-output.json)
+SERVER_NAME=$(jq -r '.server_name // "default"' gitops-output.json)
+LAYER=$(jq -r '.layer_dir // "2-services"' gitops-output.json)
+TYPE=$(jq -r '.type // "base"' gitops-output.json)
 
 mkdir -p .testrepo
 
@@ -18,64 +37,16 @@ cd .testrepo || exit 1
 
 find . -name "*"
 
-if [[ ! -f "argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml" ]]; then
-  echo "ArgoCD config missing - argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
-  exit 1
-fi
+set -e
 
-echo "Argocd config - argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
-cat "argocd/2-services/cluster/${SERVER_NAME}/base/${NAMESPACE}-${NAME}.yaml"
+validate_gitops_content "${NAMESPACE}" "${LAYER}" "${SERVER_NAME}" "${TYPE}" "${COMPONENT_NAME}" "values.yaml"
+validate_gitops_content "${NAMESPACE}" "${LAYER}" "${SERVER_NAME}" "${TYPE}" "${COMPONENT_NAME}" "values-${SERVER_NAME}.yaml"
+validate_gitops_content "${NAMESPACE}" "${LAYER}" "${SERVER_NAME}" "${TYPE}" "${COMPONENT_NAME}" "templates/sonarqube-access.yaml"
 
-if [[ ! -f "payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml" ]]; then
-  echo "Application values not found - payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
-  exit 1
-fi
+check_k8s_namespace "${NAMESPACE}"
 
-echo "Payload - payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
-cat "payload/2-services/namespace/${NAMESPACE}/${NAME}/values-${SERVER_NAME}.yaml"
-
-if [[ ! -f "payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml" ]]; then
-  echo "Sonarqube secret missing - payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml"
-  exit 1
-fi
-
-echo "Sonarqube secret - payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml"
-cat "payload/2-services/namespace/${NAMESPACE}/${NAME}/templates/sonarqube-access.yaml"
+check_k8s_resource "${NAMESPACE}" "sealedsecret" "sonarqube-access"
+check_k8s_resource "${NAMESPACE}" "secret" "sonarqube-access"
 
 cd ..
 rm -rf .testrepo
-
-count=0
-until kubectl get namespace "${NAMESPACE}" 1> /dev/null 2> /dev/null || [[ $count -eq 20 ]]; do
-  echo "Waiting for namespace: ${NAMESPACE}"
-  count=$((count + 1))
-  sleep 15
-done
-
-if [[ $count -eq 20 ]]; then
-  echo "Timed out waiting for namespace: ${NAMESPACE}"
-  exit 1
-else
-  echo "Found namespace: ${NAMESPACE}. Sleeping for 30 seconds to wait for everything to settle down"
-  sleep 30
-fi
-
-
-count=0
-until kubectl get secret -n "${NAMESPACE}" sonarqube-access 1> /dev/null 2> /dev/null || [[ $count -eq 20 ]]; do
-  echo "Waiting for secret in ${NAMESPACE}: sonarqube-access"
-  count=$((count + 1))
-  sleep 15
-done
-
-kubectl get all -n "${NAMESPACE}"
-kubectl describe sealedsecret -n "${NAMESPACE}"
-
-if [[ $count -eq 20 ]]; then
-  echo "Timed out waiting for secret in ${NAMESPACE}: sonarqube-access"
-  exit 1
-fi
-
-kubectl get secret -n "${NAMESPACE}" sonarqube-access || exit 1
-
-oc extract secret/sonarqube-access -n "${NAMESPACE}" --to=-
