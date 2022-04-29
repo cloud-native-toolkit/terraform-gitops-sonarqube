@@ -201,6 +201,8 @@ module "service_account" {
     verbs = ["use"]
   }
   ]
+  rbac_cluster_scope = true
+
 }
 
 module setup_group_scc {
