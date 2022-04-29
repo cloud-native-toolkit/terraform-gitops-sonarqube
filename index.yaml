@@ -15,7 +15,7 @@ versions:
       - id: gitops
         refs:
           - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
-            version: ">= 1.1.0"
+            version: '>= 1.1.0'
       - id: cluster
         refs: []
         interface: github.com/cloud-native-toolkit/garage-terraform-modules#cluster
@@ -23,7 +23,181 @@ versions:
       - id: namespace
         refs:
           - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
+    variables:
+      - name: gitops_config
+        type: |-
+          object({
+              boostrap = object({
+                argocd-config = object({
+                  project = string
+                  repo = string
+                  url = string
+                  path = string
+                })
+              })
+              infrastructure = object({
+                argocd-config = object({
+                  project = string
+                  repo = string
+                  url = string
+                  path = string
+                })
+                payload = object({
+                  repo = string
+                  url = string
+                  path = string
+                })
+              })
+              services = object({
+                argocd-config = object({
+                  project = string
+                  repo = string
+                  url = string
+                  path = string
+                })
+                payload = object({
+                  repo = string
+                  url = string
+                  path = string
+                })
+              })
+              applications = object({
+                argocd-config = object({
+                  project = string
+                  repo = string
+                  url = string
+                  path = string
+                })
+                payload = object({
+                  repo = string
+                  url = string
+                  path = string
+                })
+              })
+            })
+        description: Config information regarding the gitops repo structure
+        moduleRef:
+          id: gitops
+          output: gitops_config
+      - name: git_credentials
+        type: |-
+          list(object({
+              repo = string
+              url = string
+              username = string
+              token = string
+            }))
+        sensitive: true
+        description: The credentials for the gitops repo(s)
+        moduleRef:
+          id: gitops
+          output: git_credentials
+      - name: namespace
+        type: string
+        description: The namespace where the application should be deployed
+        moduleRef:
+          id: namespace
+          output: name
+      - name: cluster_ingress_hostname
+        type: string
+        description: Ingress hostname of the IKS cluster.
+        default: ''
+        moduleRef:
+          id: cluster
+          output: platform.ingress
+      - name: cluster_type
+        type: string
+        description: The cluster type (openshift or ocp3 or ocp4 or kubernetes)
+        default: ocp4
+        moduleRef:
+          id: cluster
+          output: platform.type_code
+      - name: tls_secret_name
+        type: string
+        description: The name of the secret containing the tls certificate values
+        default: ''
+        moduleRef:
+          id: cluster
+          output: platform.tls_secret
+      - name: storage_class
+        type: string
+        description: The storage class to use for the persistent volume claim
+        default: ''
+      - name: service_account_name
+        description: The name of the service account that should be used for the deployment
+        type: string
+        default: sonarqube-sonarqube
+      - name: plugins
+        description: The list of plugins that will be installed on SonarQube
+        type: list(string)
+        default:
+          - >-
+            https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar
+      - name: postgresql
+        type: |-
+          object({
+              username      = string
+              password      = string
+              hostname      = string
+              port          = string
+              database_name = string
+              external      = bool
+            })
+        description: Properties for an existing postgresql database
+        default: 'null'
+      - name: hostname
+        type: string
+        description: The hostname that will be used for the ingress/route
+        default: sonarqube
+      - name: persistence
+        type: bool
+        description: Flag indicating that persistence should be enabled for the pods
+        default: false
+      - name: kubeseal_cert
+        type: string
+        description: The certificate/public key used to encrypt the sealed secrets
+        default: ''
+        moduleRef:
+          id: gitops
+          output: sealed_secrets_cert
+      - name: server_name
+        type: string
+        description: The name of the server
+        default: default
+        moduleRef:
+          id: gitops
+          output: server_name
+    version: v1.2.3
+    outputs:
+      - name: name
+        description: The name of the module
+      - name: branch
+        description: The branch where the module config has been placed
+      - name: namespace
+        description: The namespace where the module will be deployed
+      - name: server_name
+        description: The server where the module will be deployed
+      - name: layer
+        description: The layer where the module is deployed
+      - name: type
+        description: The type of module where the module is deployed
+  - platforms:
+      - kubernetes
+      - ocp4
+    dependencies:
+      - id: gitops
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
+            version: '>= 1.1.0'
+      - id: cluster
+        refs: []
+        interface: github.com/cloud-native-toolkit/garage-terraform-modules#cluster
+        optional: true
+      - id: namespace
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
+            version: '>= 1.0.0'
     variables:
       - name: gitops_config
         moduleRef:
@@ -114,7 +288,7 @@ versions:
           output: platform.ingress
         type: string
         description: Ingress hostname of the IKS cluster.
-        default: ""
+        default: ''
         optional: true
       - name: tls_secret_name
         moduleRef:
@@ -122,7 +296,7 @@ versions:
           output: platform.tls_secret
         type: string
         description: The name of the secret containing the tls certificate values
-        default: ""
+        default: ''
         optional: true
       - name: namespace
         moduleRef:
@@ -136,12 +310,12 @@ versions:
           output: sealed_secrets_cert
         type: string
         description: The certificate/public key used to encrypt the sealed secrets
-        default: ""
+        default: ''
         optional: true
       - name: storage_class
         type: string
         description: The storage class to use for the persistent volume claim
-        default: ""
+        default: ''
         optional: true
       - name: service_account_name
         type: string
@@ -151,7 +325,10 @@ versions:
       - name: plugins
         type: list(string)
         description: The list of plugins that will be installed on SonarQube
-        default: '[ https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar ]'
+        default: >-
+          [
+          https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar
+          ]
         optional: true
       - name: postgresql
         type: |-
@@ -164,7 +341,9 @@ versions:
               external      = bool
             })
         description: Properties for an existing postgresql database
-        default: '{ username = password = hostname = port = database_name = external = false }'
+        default: >-
+          { username = password = hostname = port = database_name = external =
+          false }
         optional: true
       - name: hostname
         type: string
@@ -184,25 +363,26 @@ versions:
       - id: gitops
         refs:
           - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
-            version: ">= 1.1.0"
+            version: '>= 1.1.0'
       - id: cluster
         refs:
           - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-            version: ">= 1.7.0"
+            version: '>= 1.7.0'
           - source: github.com/ibm-garage-cloud/terraform-ibm-ocp-vpc
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
           - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-            version: ">= 2.0.0"
+            version: '>= 2.0.0'
       - id: namespace
         refs:
           - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
       - id: argocd-bootstrap
         refs:
-          - source: github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
-            version: "> 0.0.0"
+          - source: >-
+              github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
+            version: '> 0.0.0'
           - source: github.com/cloud-native-toolkit/terraform-vsi-argocd-bootstrap.git
-            version: "> 0.0.0"
+            version: '> 0.0.0'
         optional: true
     variables:
       - name: gitops_config
@@ -294,7 +474,7 @@ versions:
           output: platform.ingress
         type: string
         description: Ingress hostname of the IKS cluster.
-        default: ""
+        default: ''
         optional: true
       - name: tls_secret_name
         moduleRef:
@@ -302,7 +482,7 @@ versions:
           output: platform.tls_secret
         type: string
         description: The name of the secret containing the tls certificate values
-        default: ""
+        default: ''
         optional: true
       - name: namespace
         moduleRef:
@@ -316,12 +496,12 @@ versions:
           output: sealed_secrets_cert
         type: string
         description: The certificate/public key used to encrypt the sealed secrets
-        default: ""
+        default: ''
         optional: true
       - name: storage_class
         type: string
         description: The storage class to use for the persistent volume claim
-        default: ""
+        default: ''
         optional: true
       - name: service_account_name
         type: string
@@ -331,7 +511,10 @@ versions:
       - name: plugins
         type: list(string)
         description: The list of plugins that will be installed on SonarQube
-        default: '[ https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar ]'
+        default: >-
+          [
+          https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar
+          ]
         optional: true
       - name: postgresql
         type: |-
@@ -344,7 +527,9 @@ versions:
               external      = bool
             })
         description: Properties for an existing postgresql database
-        default: '{ username = password = hostname = port = database_name = external = false }'
+        default: >-
+          { username = password = hostname = port = database_name = external =
+          false }
         optional: true
       - name: hostname
         type: string
@@ -364,25 +549,26 @@ versions:
       - id: gitops
         refs:
           - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
-            version: ">= 1.1.0"
+            version: '>= 1.1.0'
       - id: cluster
         refs:
           - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-            version: ">= 1.7.0"
+            version: '>= 1.7.0'
           - source: github.com/ibm-garage-cloud/terraform-ibm-ocp-vpc
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
           - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-            version: ">= 2.0.0"
+            version: '>= 2.0.0'
       - id: namespace
         refs:
           - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
       - id: argocd-bootstrap
         refs:
-          - source: github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
-            version: "> 0.0.0"
+          - source: >-
+              github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
+            version: '> 0.0.0'
           - source: github.com/cloud-native-toolkit/terraform-vsi-argocd-bootstrap.git
-            version: "> 0.0.0"
+            version: '> 0.0.0'
         optional: true
     variables:
       - name: gitops_config
@@ -474,7 +660,7 @@ versions:
           output: platform.ingress
         type: string
         description: Ingress hostname of the IKS cluster.
-        default: ""
+        default: ''
         optional: true
       - name: tls_secret_name
         moduleRef:
@@ -482,7 +668,7 @@ versions:
           output: platform.tls_secret
         type: string
         description: The name of the secret containing the tls certificate values
-        default: ""
+        default: ''
         optional: true
       - name: namespace
         moduleRef:
@@ -496,12 +682,12 @@ versions:
           output: sealed_secrets_cert
         type: string
         description: The certificate/public key used to encrypt the sealed secrets
-        default: ""
+        default: ''
         optional: true
       - name: storage_class
         type: string
         description: The storage class to use for the persistent volume claim
-        default: ""
+        default: ''
         optional: true
       - name: service_account_name
         type: string
@@ -511,7 +697,10 @@ versions:
       - name: plugins
         type: list(string)
         description: The list of plugins that will be installed on SonarQube
-        default: '[ https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar ]'
+        default: >-
+          [
+          https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar
+          ]
         optional: true
       - name: postgresql
         type: |-
@@ -524,7 +713,9 @@ versions:
               external      = bool
             })
         description: Properties for an existing postgresql database
-        default: '{ username = password = hostname = port = database_name = external = false }'
+        default: >-
+          { username = password = hostname = port = database_name = external =
+          false }
         optional: true
       - name: hostname
         type: string
@@ -544,25 +735,26 @@ versions:
       - id: gitops
         refs:
           - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
-            version: ">= 1.1.0"
+            version: '>= 1.1.0'
       - id: cluster
         refs:
           - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-            version: ">= 1.7.0"
+            version: '>= 1.7.0'
           - source: github.com/ibm-garage-cloud/terraform-ibm-ocp-vpc
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
           - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-            version: ">= 2.0.0"
+            version: '>= 2.0.0'
       - id: namespace
         refs:
           - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
       - id: argocd-bootstrap
         refs:
-          - source: github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
-            version: "> 0.0.0"
+          - source: >-
+              github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
+            version: '> 0.0.0'
           - source: github.com/cloud-native-toolkit/terraform-vsi-argocd-bootstrap.git
-            version: "> 0.0.0"
+            version: '> 0.0.0'
         optional: true
     variables:
       - name: gitops_config
@@ -654,7 +846,7 @@ versions:
           output: platform.ingress
         type: string
         description: Ingress hostname of the IKS cluster.
-        default: ""
+        default: ''
         optional: true
       - name: tls_secret_name
         moduleRef:
@@ -662,7 +854,7 @@ versions:
           output: platform.tls_secret
         type: string
         description: The name of the secret containing the tls certificate values
-        default: ""
+        default: ''
         optional: true
       - name: namespace
         moduleRef:
@@ -676,12 +868,12 @@ versions:
           output: sealed_secrets_cert
         type: string
         description: The certificate/public key used to encrypt the sealed secrets
-        default: ""
+        default: ''
         optional: true
       - name: storage_class
         type: string
         description: The storage class to use for the persistent volume claim
-        default: ""
+        default: ''
         optional: true
       - name: service_account_name
         type: string
@@ -691,7 +883,10 @@ versions:
       - name: plugins
         type: list(string)
         description: The list of plugins that will be installed on SonarQube
-        default: '[ https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar ]'
+        default: >-
+          [
+          https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar
+          ]
         optional: true
       - name: postgresql
         type: |-
@@ -704,7 +899,9 @@ versions:
               external      = bool
             })
         description: Properties for an existing postgresql database
-        default: '{ username = password = hostname = port = database_name = external = false }'
+        default: >-
+          { username = password = hostname = port = database_name = external =
+          false }
         optional: true
       - name: hostname
         type: string
@@ -719,25 +916,26 @@ versions:
       - id: gitops
         refs:
           - source: github.com/cloud-native-toolkit/terraform-tools-gitops.git
-            version: ">= 1.1.0"
+            version: '>= 1.1.0'
       - id: cluster
         refs:
           - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-            version: ">= 1.7.0"
+            version: '>= 1.7.0'
           - source: github.com/ibm-garage-cloud/terraform-ibm-ocp-vpc
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
           - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-            version: ">= 2.0.0"
+            version: '>= 2.0.0'
       - id: namespace
         refs:
           - source: github.com/cloud-native-toolkit/terraform-gitops-namespace.git
-            version: ">= 1.0.0"
+            version: '>= 1.0.0'
       - id: argocd-bootstrap
         refs:
-          - source: github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
-            version: "> 0.0.0"
+          - source: >-
+              github.com/cloud-native-toolkit/terraform-tools-argocd-bootstrap.git
+            version: '> 0.0.0'
           - source: github.com/cloud-native-toolkit/terraform-vsi-argocd-bootstrap.git
-            version: "> 0.0.0"
+            version: '> 0.0.0'
         optional: true
     variables:
       - name: gitops_config
@@ -821,7 +1019,7 @@ versions:
           output: platform.ingress
         type: string
         description: Ingress hostname of the IKS cluster.
-        default: ""
+        default: ''
         optional: true
       - name: tls_secret_name
         moduleRef:
@@ -829,7 +1027,7 @@ versions:
           output: platform.tls_secret
         type: string
         description: The name of the secret containing the tls certificate values
-        default: ""
+        default: ''
         optional: true
       - name: namespace
         moduleRef:
@@ -843,12 +1041,12 @@ versions:
           output: sealed_secrets_cert
         type: string
         description: The certificate/public key used to encrypt the sealed secrets
-        default: ""
+        default: ''
         optional: true
       - name: storage_class
         type: string
         description: The storage class to use for the persistent volume claim
-        default: ""
+        default: ''
         optional: true
       - name: service_account_name
         type: string
@@ -858,7 +1056,10 @@ versions:
       - name: plugins
         type: list(string)
         description: The list of plugins that will be installed on SonarQube
-        default: '[ https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar ]'
+        default: >-
+          [
+          https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar
+          ]
         optional: true
       - name: postgresql
         type: |-
@@ -871,7 +1072,9 @@ versions:
               external      = bool
             })
         description: Properties for an existing postgresql database
-        default: '{ username = password = hostname = port = database_name = external = false }'
+        default: >-
+          { username = password = hostname = port = database_name = external =
+          false }
         optional: true
       - name: hostname
         type: string
@@ -884,19 +1087,5 @@ versions:
       - ocp3
       - ocp4
     dependencies: []
-    #    - id: cluster
-    #      refs:
-    #        - source: github.com/ibm-garage-cloud/terraform-ibm-container-platform
-    #          version: ">= 1.7.0"
-    #        - source: github.com/ibm-garage-cloud/terraform-k8s-ocp-cluster
-    #          version: ">= 2.0.0"
-    #    - id: namespace
-    #      refs:
-    #        - source: github.com/ibm-garage-cloud/terraform-k8s-namespace
-    #          version: ">= 2.1.0"
-    #    - id: dashboard
-    #      refs:
-    #        - source: github.com/ibm-garage-cloud/terraform-k8s-dashboard
-    #          version: ">= 1.6.0"
     variables: []
     version: v0.0.0
