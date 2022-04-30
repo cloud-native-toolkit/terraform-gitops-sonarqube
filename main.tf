@@ -73,7 +73,7 @@ locals {
     }
     containerSecurityContext = {
   # Sonarqube dockerfile creates sonarqube user as UID and GID 1000 by default.updating it to SA
-      runAsUser = var.service_account_name
+      runAsUser = 1001
     }
   
   }
