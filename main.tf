@@ -71,10 +71,10 @@ locals {
       enabled = true
       createSCC = false
     }
-    containerSecurityContext = {
+    #containerSecurityContext = {
   # Sonarqube dockerfile creates sonarqube user as UID and GID 1000 by default.updating it to SA
-      runAsUser = 1001
-    }
+      #runAsUser = 1001
+    #}
   
   }
   postgresql = var.postgresql != null ? var.postgresql : {
@@ -200,49 +200,13 @@ module "service_account" {
     resources = ["deployments"]
     verbs = ["*"]
   },{
-    apiGroups = [""]
-    resources = ["namespaces"]
-    verbs = ["get"]
-  },{
-    apiGroups = ["policy"]
-    resources = ["podsecuritypolicies","poddisruptionbudgets"]
-    verbs = ["*"]
-  },{
-    apiGroups = ["rbac.authorization.k8s.io"]
-    resources = ["clusterrolebindings","clusterroles","rolebindings","roles"]
-    verbs = ["*"]
-  },{
-    apiGroups = ["batch"]
-    resources = ["jobs"]
-    verbs = ["*"]
-  },{
-    apiGroups = ["monitoring.coreos.com"]
-    resources = ["servicemonitors"]
-    verbs = ["get","create"]
-  },{
-    apiGroups = ["charts.helm.k8s.io"]
-    resources = ["*"]
-    verbs = ["*"]
-  },{
-    apiGroups = ["networking.istio.io"]
-    resources = ["gateways","virtualservices"]
-    verbs = ["*"]
-  },{
-    apiGroups = ["cert-manager.io"]
-    resources = ["certificates"]
-    verbs = ["*"]
-  },{
-    apiGroups = ["route.openshift.io"]
-    resources = ["routes","routes/custom-host"]
-    verbs = ["*"]
-  },{
     apiGroups = ["security.openshift.io"]
     resourceNames = ["gitops-sonarqube-sonarqube-sonarqube-anyuid","gitops-sonarqube-sonarqube-sonarqube-privileged"]
     resources = ["securitycontextconstraints"]
     verbs = ["use"]
   }
   ]
-  rbac_cluster_scope = true
+  #rbac_cluster_scope = true
 
 }
 
