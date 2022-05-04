@@ -6,6 +6,7 @@ locals {
   ingress_url  = "https://${local.ingress_host}"
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
   values_file = "values-${var.server_name}.yaml"
+  secret_dir    = local.tmp_dir
 
   layer = "services"
   application_branch = "main"
