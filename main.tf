@@ -6,7 +6,7 @@ locals {
   ingress_url  = "https://${local.ingress_host}"
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
   values_file = "values-${var.server_name}.yaml"
-  secret_dir    = local.tmp_dir
+  secret_dir    = "${local.tmp_dir}/secrets"
 
   layer = "services"
   application_branch = "main"
@@ -173,7 +173,8 @@ resource null_resource setup_chart {
 }
 
 module seal_secrets {
-  
+
+  depends_on = [null_resource.setup_chart]
   source = "github.com/cloud-native-toolkit/terraform-util-seal-secrets.git?ref=v1.0.0"
 
   source_dir    = local.secret_dir

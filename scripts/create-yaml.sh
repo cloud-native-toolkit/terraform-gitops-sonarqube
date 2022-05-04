@@ -28,11 +28,12 @@ fi
 if [[ -n "${KUBESEAL_CERT}" ]]; then
   TEMPLATE_DIR="${DEST_DIR}/templates"
   mkdir -p "${TEMPLATE_DIR}"
+  mkdir -p "${TMP_DIR}/secrets"
 
   KUBESEAL_CERT_FILE="${TMP_DIR}/kubeseal.cert"
   echo "${KUBESEAL_CERT}" > "${KUBESEAL_CERT_FILE}"
 
-  SECRET_FILE="${TMP_DIR}/sonarqube-access.yaml"
+  SECRET_FILE="${TMP_DIR}/secrets/sonarqube-access.yaml"
   cat > "${SECRET_FILE}" << EOL
 apiVersion: v1
 kind: Secret
