@@ -161,7 +161,18 @@ module setup_clis {
 resource null_resource setup_chart {
   provisioner "local-exec" {
     command = "${path.module}/scripts/create-yaml.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
+    environment = {
+      VALUES_CONTENT = yamlencode(local.values_content)
+      VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
+      TMP_DIR = local.tmp_dir
+    }
+  }
+}
 
+resource null_resource create_secret {
+  depends_on = [null_resource.setup_chart]
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/create-secrets.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
       VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
@@ -174,6 +185,7 @@ resource null_resource setup_chart {
 
 module seal_secrets {
 
+  depends_on = [null_resource.create_secret]
   source = "github.com/cloud-native-toolkit/terraform-util-seal-secrets.git?ref=v1.0.0"
 
   source_dir    = local.secret_dir
