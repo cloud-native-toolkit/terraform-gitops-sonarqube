@@ -155,6 +155,8 @@ module setup_clis {
   source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
 }
 
+
+
 resource null_resource setup_chart {
   provisioner "local-exec" {
     command = "${path.module}/scripts/create-yaml.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
@@ -169,6 +171,16 @@ resource null_resource setup_chart {
   }
 }
 
+module seal_secrets {
+  
+  source = "github.com/cloud-native-toolkit/terraform-util-seal-secrets.git?ref=v1.0.0"
+
+  source_dir    = local.secret_dir
+  dest_dir      = "${local.yaml_dir}/templates"
+  kubeseal_cert = var.kubeseal_cert
+  label         = local.name
+}
+
 module "service_account" {
   source = "github.com/cloud-native-toolkit/terraform-gitops-service-account.git"
 
@@ -181,7 +193,7 @@ module "service_account" {
 }
 
 resource null_resource setup_gitops {
-  depends_on = [null_resource.setup_chart, module.service_account]
+  depends_on = [null_resource.setup_chart, module.service_account,module.seal_secrets]
 
   triggers = {
     name = local.name

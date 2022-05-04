@@ -53,17 +53,17 @@ stringData:
   SONARQUBE_USER: admin
 EOL
 
-  KUBESEAL=$(command -v kubeseal | command -v ./bin/kubeseal)
-  if [[ -z "${KUBESEAL}" ]]; then
-    BIN_DIR=$(cd ./bin; pwd -P)
-    mkdir -p "${BIN_DIR}" && curl -Lo "${BIN_DIR}/kubeseal" https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/kubeseal-linux-amd64
-    chmod +x "${BIN_DIR}/kubeseal"
-    KUBESEAL="${BIN_DIR}/kubeseal"
-  fi
+  #KUBESEAL=$(command -v kubeseal | command -v ./bin/kubeseal)
+  #if [[ -z "${KUBESEAL}" ]]; then
+    #BIN_DIR=$(cd ./bin; pwd -P)
+    #mkdir -p "${BIN_DIR}" && curl -Lo "${BIN_DIR}/kubeseal" https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.16.0/kubeseal-linux-amd64
+    #chmod +x "${BIN_DIR}/kubeseal"
+    #KUBESEAL="${BIN_DIR}/kubeseal"
+  #fi
 
   echo "Kubeseal cert"
   cat "${KUBESEAL_CERT_FILE}"
-
+  KUBESEAL=$(command -v kubeseal | command -v ./bin/kubeseal)
   ${KUBESEAL} --cert "${KUBESEAL_CERT_FILE}" --format yaml < "${SECRET_FILE}" > "${TEMPLATE_DIR}/sonarqube-access.yaml"
 
   echo "Sealed secret"
