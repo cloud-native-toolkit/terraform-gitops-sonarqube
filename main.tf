@@ -186,7 +186,7 @@ resource null_resource setup_chart {
 module seal_secrets {
 
   depends_on = [null_resource.setup_chart]
-  source = "github.com/cloud-native-toolkit/terraform-util-seal-secrets.git?ref=v1.0.0"
+  source = "github.com/cloud-native-toolkit/terraform-util-seal-secrets.git"
 
   source_dir    = local.secret_dir
   dest_dir      = "${local.yaml_dir}/templates"
