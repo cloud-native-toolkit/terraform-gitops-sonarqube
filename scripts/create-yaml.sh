@@ -14,7 +14,7 @@ if [[ -z "${TMP_DIR}" ]]; then
   TMP_DIR="./.tmp/sonarqube"
 fi
 mkdir -p "${TMP_DIR}"
-chmod -m 777 create-secrets.sh
+chmod +x "${path.cwd}/scripts/create-secrets.sh"
 
 cp -R "${MODULE_DIR}/chart/sonarqube/"* "${DEST_DIR}"
 
