@@ -163,11 +163,13 @@ resource null_resource setup_chart {
       VALUES_CONTENT = yamlencode(local.values_content)
       VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
       TMP_DIR = local.tmp_dir
+      KUBESEAL_CERT = var.kubeseal_cert
+      ADMIN_PASSWORD = local.admin_password
     }
   }
 }
 
-resource null_resource create_secret {
+/*resource null_resource create_secret {
   depends_on = [null_resource.setup_chart]
   provisioner "local-exec" {
     command = "${path.module}/scripts/create-secrets.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
@@ -179,7 +181,7 @@ resource null_resource create_secret {
       TMP_DIR = local.tmp_dir
     }
   }
-}
+}*/
 
 module seal_secrets {
 
