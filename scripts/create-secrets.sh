@@ -20,7 +20,7 @@ fi
 kubectl create secret generic sonarqube-access \
   --from-literal="SONARQUBE_URL=${SERVICE_URL}" \
   --from-literal="SONARQUBE_PASSWORD=${ADMIN_PASSWORD}" \
-  --from-literal="SONARQUBE_USER=admin" \
+  --from-literal="SONARQUBE_USER=${USERNAME}" \
   -n "${NAMESPACE}" \
   --dry-run=client \
   --output=yaml > "${DEST_DIR}/sonarqube-access.yaml"

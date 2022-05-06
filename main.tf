@@ -14,7 +14,7 @@ locals {
   name = "sonarqube"
   path = "sonarqube"
   admin_password = "admin"
-
+  username = "admin"
   global_config    = {
     storageClass = var.storage_class
     clusterType = var.cluster_type
@@ -180,7 +180,6 @@ resource null_resource create_yaml {
 
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
-      VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
     }
   }
 }
@@ -195,6 +194,7 @@ resource null_resource create_secrets_yaml {
       BIN_DIR = module.setup_clis.bin_dir
       ADMIN_PASSWORD = local.admin_password
       SERVICE_URL = local.service_url
+      USERNAME = local.username
       
     }
   }
