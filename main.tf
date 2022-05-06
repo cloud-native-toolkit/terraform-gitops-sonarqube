@@ -193,8 +193,8 @@ resource null_resource create_secrets_yaml {
 
     environment = {
       BIN_DIR = module.setup_clis.bin_dir
-      ADMIN_PASSWORD = locals.admin_password
-      SERVICE_URL = locals.service_url
+      ADMIN_PASSWORD = local.admin_password
+      SERVICE_URL = local.service_url
       
     }
   }
