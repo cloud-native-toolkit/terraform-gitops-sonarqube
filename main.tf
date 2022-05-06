@@ -2,6 +2,7 @@ locals {
   bin_dir = module.setup_clis.bin_dir
   tmp_dir      = "${path.cwd}/.tmp/sonarqube"
   yaml_dir    = "${local.tmp_dir}/chart/sonarqube"
+  chart_dir   = "${path.module}/chart/sonarqube"
   ingress_host = "${var.hostname}-${var.namespace}.${var.cluster_ingress_hostname}"
   ingress_url  = "https://${local.ingress_host}"
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
@@ -156,36 +157,52 @@ module setup_clis {
   source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
 }
 
-resource null_resource setup_chart {
+/*resource null_resource setup_chart {
   provisioner "local-exec" {
     command = "${path.module}/scripts/create-yaml.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
       VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
       TMP_DIR = local.tmp_dir
-      KUBESEAL_CERT = var.kubeseal_cert
-      ADMIN_PASSWORD = local.admin_password
-    }
-  }
-}
-
-/*resource null_resource create_secret {
-  depends_on = [null_resource.setup_chart]
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/create-secrets.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
-    environment = {
-      VALUES_CONTENT = yamlencode(local.values_content)
-      VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
-      KUBESEAL_CERT = var.kubeseal_cert
-      ADMIN_PASSWORD = local.admin_password
-      TMP_DIR = local.tmp_dir
     }
   }
 }*/
 
-module seal_secrets {
+resource null_resource create_yaml {
+  triggers = {
+    name      = local.name
+    chart_dir = local.chart_dir
+    yaml_dir  = local.yaml_dir
+  }
 
-  depends_on = [null_resource.setup_chart]
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/create-yaml.sh '${self.triggers.name}' '${self.triggers.chart_dir}' '${self.triggers.yaml_dir}' '${local.values_file}'"
+
+    environment = {
+      VALUES_CONTENT = yamlencode(local.values_content)
+      VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
+    }
+  }
+}
+
+resource null_resource create_secrets_yaml {
+  depends_on = [null_resource.create_yaml]
+
+  provisioner "local-exec" {
+    command = "${path.module}/scripts/create-secrets.sh '${var.namespace}' '${local.secret_dir}'"
+
+    environment = {
+      BIN_DIR = module.setup_clis.bin_dir
+      ADMIN_PASSWORD = locals.admin_password
+      SERVICE_URL = locals.service_url
+      
+    }
+  }
+}
+
+module seal_secrets {
+  depends_on = [null_resource.create_secrets_yaml]
+
   source = "github.com/cloud-native-toolkit/terraform-util-seal-secrets.git"
 
   source_dir    = local.secret_dir
