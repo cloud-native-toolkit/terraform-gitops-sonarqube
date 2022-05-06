@@ -12,8 +12,9 @@ fi
 
 mkdir -p "${DEST_DIR}"
 
-if [[ -z "${SERVICE_URL}" ]] || [[ -z "${ADMIN_PASSWORD}" ]]; then
-  echo "SERVICE_URL, ADMIN_PASSWORD must be provided as environment variables"
+echo "***USER***: ${USERNAME}"
+if [[ -z "${SERVICE_URL}" ]] || [[ -z "${ADMIN_PASSWORD}" ]] || [[ -z "${USERNAME}" ]]; then
+  echo "SERVICE_URL, ADMIN_PASSWORD,USERNAME must be provided as environment variables"
   exit 1
 fi
 
