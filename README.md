@@ -3,7 +3,7 @@
 This is a Starter kit to help with the creation of Terraform modules. The basic structure of a Terraform module is fairly
 simple and consists of the following basic values:
 
-- README.md - provides  description of the module
+- README.md - provides a description of the module
 - main.tf - defiens the logic for the module
 - variables.tf (optional) - defines the input variables for the module
 - outputs.tf (optional) - defines the values that are output from the module
