@@ -1,5 +1,5 @@
 module "dev_software_olm_release" {
-  source = "github.com/ibm-garage-cloud/garage-terraform-modules.git//self-managed/software/operator-lifecycle-manager?ref=olm"
+  source = "github.com/cloud-native-toolkit/terraform-k8s-olm"
 
   cluster_config_file      = module.dev_cluster.config_file_path
   cluster_version          = module.dev_cluster.version
