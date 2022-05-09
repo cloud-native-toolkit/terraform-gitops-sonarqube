@@ -156,18 +156,18 @@ module setup_clis {
   source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
 }
 
-/*resource null_resource setup_chart {
+resource null_resource setup_chart {
   provisioner "local-exec" {
-    command = "${path.module}/scripts/create-yaml.sh '${local.yaml_dir}' '${local.service_url}' '${var.namespace}' '${local.values_file}'"
+    command = "${path.module}/scripts/create-yaml.sh '${local.yaml_dir}' '${local.values_file}'"
     environment = {
       VALUES_CONTENT = yamlencode(local.values_content)
       VALUES_SERVER_CONTENT = yamlencode(local.values_server_content)
       TMP_DIR = local.tmp_dir
     }
   }
-}*/
+}
 
-resource null_resource create_yaml {
+/*resource null_resource create_yaml {
   triggers = {
     name      = local.name
     chart_dir = local.chart_dir
@@ -181,7 +181,7 @@ resource null_resource create_yaml {
       VALUES_CONTENT = yamlencode(local.values_content)
     }
   }
-}
+}*/
 
 resource null_resource create_secrets_yaml {
   depends_on = [null_resource.create_yaml]
