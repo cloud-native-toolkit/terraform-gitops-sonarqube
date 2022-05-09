@@ -1,4 +1,4 @@
-module "dev_software_olm_release" {
+module "dev_software_olm" {
   source = "github.com/cloud-native-toolkit/terraform-k8s-olm"
 
   cluster_config_file      = module.dev_cluster.config_file_path
