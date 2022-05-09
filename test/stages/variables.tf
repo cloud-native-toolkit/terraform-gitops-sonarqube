@@ -82,5 +82,11 @@ variable "ibmcloud_api_key" {
 variable "region" {
 }
 
+variable "cluster_version" {
+  type        = string
+  description = "The cluster version"
+  default     = ""
+}
+
 #variable "resource_group_name" {
 #}
