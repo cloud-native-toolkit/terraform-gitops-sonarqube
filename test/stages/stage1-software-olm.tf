@@ -3,5 +3,5 @@ module "dev_software_olm" {
 
   cluster_config_file      = module.dev_cluster.config_file_path
   cluster_version          = var.cluster_version
-  cluster_type             = var.cluster_type
+  cluster_type             = module.dev_cluster.platform.type_code
 }
