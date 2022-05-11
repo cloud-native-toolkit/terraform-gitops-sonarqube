@@ -1,4 +1,4 @@
-SonarQube gitops module
+# SonarQube gitops module
 
 Module to populate a gitops repo with the resources to deploy SonarQube
 
