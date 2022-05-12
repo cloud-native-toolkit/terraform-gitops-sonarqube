@@ -27,7 +27,7 @@ locals {
       enabled = false
     }
     serviceAccount = {
-      create = true
+      create = false
       name = var.service_account_name
     }
     podLabels = {

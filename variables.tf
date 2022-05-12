@@ -95,7 +95,7 @@ variable "storage_class" {
 variable "service_account_name" {
   description = "The name of the service account that should be used for the deployment"
   type        = string
-  default     = "sonarqube-sonarqube"
+  default     = "sonarqube"
 }
 
 variable "plugins" {
