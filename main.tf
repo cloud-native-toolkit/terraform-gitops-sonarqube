@@ -200,7 +200,7 @@ module seal_secrets {
   label         = local.name
 }
 
-module "service_account" {
+/*module "service_account" {
   source = "github.com/cloud-native-toolkit/terraform-gitops-service-account.git"
 
   gitops_config = var.gitops_config
@@ -234,10 +234,10 @@ module "service_account" {
   ]
   #rbac_cluster_scope = true
 
-}
+}*/
 
 module setup_group_scc {
-  depends_on = [module.service_account]
+  #depends_on = [module.service_account]
 
   source = "github.com/cloud-native-toolkit/terraform-gitops-sccs.git"
 
