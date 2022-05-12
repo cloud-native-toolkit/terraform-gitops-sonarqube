@@ -27,7 +27,7 @@ locals {
       enabled = false
     }
     serviceAccount = {
-      create = false
+      create = true
       name = var.service_account_name
     }
     podLabels = {
@@ -72,6 +72,11 @@ locals {
       enabled = true
       createSCC = false
     }
+    #containerSecurityContext = {
+  # Sonarqube dockerfile creates sonarqube user as UID and GID 1000 by default.updating it to SA
+      #runAsUser = 1001
+    #}
+  
   }
   postgresql = var.postgresql != null ? var.postgresql : {
     username      = "sonarUser"
@@ -167,21 +172,7 @@ resource null_resource create_yaml {
   }
 }
 
-/*resource null_resource create_yaml {
-  triggers = {
-    name      = local.name
-    chart_dir = local.chart_dir
-    yaml_dir  = local.yaml_dir
-  }
 
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/create-yaml.sh '${self.triggers.name}' '${self.triggers.chart_dir}' '${self.triggers.yaml_dir}' '${local.values_file}'"
-
-    environment = {
-      VALUES_CONTENT = yamlencode(local.values_content)
-    }
-  }
-}*/
 
 resource null_resource create_secrets_yaml {
   depends_on = [null_resource.create_yaml]
@@ -218,7 +209,47 @@ module "service_account" {
   name = var.service_account_name
   sccs = ["anyuid", "privileged"]
   server_name = var.server_name
+  rbac_rules = [{
+    apiGroups = [""]
+    resources = ["configmaps","endpoints","events","persistentvolumeclaims","pods","secrets","serviceaccounts","services"]
+    verbs = ["*"]
+  },{
+    apiGroups = ["apps"]
+    resources = ["daemonsets","deployments","statefulsets","replicasets"]
+    verbs = ["*"]
+  },{
+    apiGroups = ["apps"]
+    resources = ["deployments/finalizers"]
+    verbs = ["update"]
+  },{
+    apiGroups = ["extensions"]
+    resources = ["deployments"]
+    verbs = ["*"]
+  },{
+    apiGroups = ["security.openshift.io"]
+    resourceNames = ["gitops-sonarqube-sonarqube-sonarqube-anyuid","gitops-sonarqube-sonarqube-sonarqube-privileged"]
+    resources = ["securitycontextconstraints"]
+    verbs = ["use"]
+  }
+  ]
+  #rbac_cluster_scope = true
+
 }
+
+module setup_group_scc {
+  depends_on = [module.service_account]
+
+  source = "github.com/cloud-native-toolkit/terraform-gitops-sccs.git"
+
+  gitops_config = var.gitops_config
+  git_credentials = var.git_credentials
+  namespace = var.namespace
+  service_account = ""
+  sccs = ["anyuid"]
+  server_name = var.server_name
+  group = true
+}
+
 
 resource null_resource setup_gitops {
   depends_on = [null_resource.create_yaml, module.service_account,module.seal_secrets]

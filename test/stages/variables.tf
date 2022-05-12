@@ -1,5 +1,16 @@
 
-variable cluster_username {
+# Resource Group Variables
+#variable "resource_group_name" {
+  #type        = string
+  #description = "Existing resource group where the IKS cluster will be provisioned."
+#}
+
+#variable "ibmcloud_api_key" {
+ # type        = string
+  #description = "The api key for IBM Cloud access"
+#}
+
+variable cluster_username { 
   type        = string
   description = "The username for AWS access"
 }
@@ -12,6 +23,7 @@ variable "cluster_password" {
 variable "server_url" {
   type        = string
 }
+
 
 variable "bootstrap_prefix" {
   type = string
@@ -80,12 +92,6 @@ variable "ibmcloud_api_key" {
 }
 
 variable "region" {
-}
-
-variable "cluster_version" {
-  type        = string
-  description = "The cluster version"
-  default     = ""
 }
 
 #variable "resource_group_name" {
