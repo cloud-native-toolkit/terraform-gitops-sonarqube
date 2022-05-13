@@ -142,3 +142,9 @@ variable "server_name" {
   description = "The name of the server"
   default     = "default"
 }
+
+variable "cluster_version" {
+  type        = string
+  description = "The cluster version"
+  default     = ""
+}
