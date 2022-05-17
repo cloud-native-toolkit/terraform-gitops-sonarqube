@@ -12,6 +12,7 @@ resource null_resource write_outputs {
         layer       = module.gitops_sonarqube.layer
         layer_dir   = module.gitops_sonarqube.layer == "infrastructure" ? "1-infrastructure" : (module.gitops_sonarqube.layer == "services" ? "2-services" : "3-applications")
         type        = module.gitops_sonarqube.type
+        postgresql  = module.gitops_sonarqube.postgresql
       })
     }
   }

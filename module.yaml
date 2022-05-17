@@ -56,3 +56,7 @@ versions:
         moduleRef:
           id: gitops
           output: sealed_secrets_cert
+      - name: postgresql
+        moduleRef:
+          id: gitops-sonarqube
+          output: postgresql

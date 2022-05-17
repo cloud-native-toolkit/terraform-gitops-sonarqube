@@ -34,3 +34,9 @@ output "type" {
   value       = "base"
   depends_on  = [null_resource.setup_gitops]
 }
+
+output "postgresql" {
+  description = "Properties for an existing postgresql database"
+  value       = local.postgresql
+  depends_on  = [null_resource.setup_gitops]
+}
