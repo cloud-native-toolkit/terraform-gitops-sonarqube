@@ -145,7 +145,7 @@ versions:
               external      = bool
             })
         description: Properties for an existing postgresql database
-        default: 'null'
+        default: null
       - name: hostname
         type: string
         description: The hostname that will be used for the ingress/route
