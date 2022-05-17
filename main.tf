@@ -159,6 +159,8 @@ locals {
 
 module setup_clis {
   source = "github.com/cloud-native-toolkit/terraform-util-clis.git"
+
+  clis = ["jq", "kubectl"]
 }
 
 resource null_resource create_yaml {
@@ -172,8 +174,6 @@ resource null_resource create_yaml {
   }
 }
 
-
-
 resource null_resource create_secrets_yaml {
   depends_on = [null_resource.create_yaml]
 
@@ -184,7 +184,6 @@ resource null_resource create_secrets_yaml {
       BIN_DIR = module.setup_clis.bin_dir
       ADMIN_PASSWORD = local.admin_password
       SERVICE_URL = local.service_url
-      
     }
   }
 }
