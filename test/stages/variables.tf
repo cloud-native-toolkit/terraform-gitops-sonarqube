@@ -20,6 +20,11 @@ variable "cluster_password" {
   description = "The password for AWS access"
 }
 
+variable "cluster_ca_cert" {
+  type        = string
+  description = "The certificate authority for the cluster"
+}
+
 variable "server_url" {
   type        = string
 }
