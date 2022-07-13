@@ -22,7 +22,7 @@ appVersion: 1.16.0
 
 dependencies:
   - name: sonarqube
-    version: 9.10.3
+    version: 4.0.3
     repository: https://oteemo.github.io/charts
   - name: ocp-route
     version: 0.5.0
