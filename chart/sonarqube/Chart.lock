@@ -1,7 +1,7 @@
 dependencies:
 - name: sonarqube
-  repository: https://oteemo.github.io/charts
-  version: 9.6.3
+  repository: https://SonarSource.github.io/helm-chart-sonarqube
+  version: 4.0.3
 - name: ocp-route
   repository: https://charts.cloudnativetoolkit.dev
   version: 0.5.0
