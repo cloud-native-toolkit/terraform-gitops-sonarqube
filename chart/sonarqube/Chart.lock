@@ -1,9 +1,0 @@
-dependencies:
-- name: sonarqube
-  repository: https://SonarSource.github.io/helm-chart-sonarqube
-  version: 4.0.3
-- name: ocp-route
-  repository: https://charts.cloudnativetoolkit.dev
-  version: 0.5.0
-digest: sha256:ca7ac6a03c1a7c5a872e568ec7e6e9a31593d47748d0dc0cff5062429a1642bc
-generated: "2022-04-28T11:53:35.981822-05:00"
