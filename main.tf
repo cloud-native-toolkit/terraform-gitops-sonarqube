@@ -5,7 +5,7 @@ locals {
   chart_dir   = "${path.module}/chart/sonarqube"
   ingress_host = "${var.hostname}-${var.namespace}.${var.cluster_ingress_hostname}"
   ingress_url  = "https://${local.ingress_host}"
-  service_url  = "http://sonarqube.${var.namespace}:9000"
+  service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
   values_file = "values-${var.server_name}.yaml"
   secret_dir    = "${local.tmp_dir}/secrets"
 
@@ -137,7 +137,7 @@ locals {
     nameOverride = "sonarqube"
     targetPort = "http"
     app = "sonarqube"
-    serviceName = "sonarqube"
+    serviceName = "sonarqube-sonarqube"
     termination = "edge"
     insecurePolicy = "Redirect"
     consoleLink = {

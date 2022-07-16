@@ -28,7 +28,7 @@ BRANCH=$(jq -r '.branch // "main"' gitops-output.json)
 SERVER_NAME=$(jq -r '.server_name // "default"' gitops-output.json)
 LAYER=$(jq -r '.layer_dir // "2-services"' gitops-output.json)
 TYPE=$(jq -r '.type // "base"' gitops-output.json)
-
+STATEFULSET="sonarqube-sonarqube"
 mkdir -p .testrepo
 
 git clone https://${GIT_TOKEN}@${GIT_REPO} .testrepo
@@ -48,5 +48,6 @@ check_k8s_namespace "${NAMESPACE}"
 check_k8s_resource "${NAMESPACE}" "sealedsecret" "sonarqube-access"
 check_k8s_resource "${NAMESPACE}" "secret" "sonarqube-access"
 sleep 7m
+kubectl rollout status "statefulset/"${STATEFULSET} -n "${NAMESPACE}" || exit 1
 cd ..
 rm -rf .testrepo
