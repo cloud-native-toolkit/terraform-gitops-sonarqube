@@ -34,9 +34,9 @@ locals {
       "app.kubernetes.io/part-of" = "sonarqube"
     }
     postgresql = {
-      enabled = false
+      #enabled = false
       #enabled = true
-      #postgresqlServer = ""
+      #postgresqlServer = 
       #postgresqlDatabase = "sonarDB"
       #postgresqlUsername = "sonarUser"
       #postgresqlPassword = "sonarPass"
@@ -55,9 +55,9 @@ locals {
         enabled = false
         name = var.service_account_name
       }
-      persistence = {
-        enabled = false
-      }
+      #persistence = {
+       # enabled = false
+      #}
       volumePermissions = {
         enabled = false
       }
