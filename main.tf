@@ -34,14 +34,23 @@ locals {
       "app.kubernetes.io/part-of" = "sonarqube"
     }
     postgresql = {
-      enabled = true
-      postgresqlServer = ""
-      postgresqlDatabase = "sonarDB"
-      postgresqlUsername = "sonarUser"
-      postgresqlPassword = "sonarPass"
-      service = {
-        port = 5432
-      }
+      enabled = false
+      #enabled = true
+      #postgresqlServer = ""
+      #postgresqlDatabase = "sonarDB"
+      #postgresqlUsername = "sonarUser"
+      #postgresqlPassword = "sonarPass"
+      #service = {
+        #port = 5432
+      #}
+      #postgresql:
+  #postgresqlUsername: my-username
+  #existingSecret: my-secret
+  #existingSecretPasswordKey: pgsql-password
+  #postgresqlServer: pgsql.example.com
+  #postgresqlDatabase: sonarDB
+  #service:
+    #port: 5432
       serviceAccount = {
         enabled = false
         name = var.service_account_name
