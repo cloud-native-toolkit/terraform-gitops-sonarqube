@@ -24,7 +24,7 @@ locals {
       pullPolicy = "Always"
     }
     persistence = {
-      enabled = false
+      enabled = true
     }
     serviceAccount = {
       create = false
@@ -43,32 +43,24 @@ locals {
       service = {
         port = 5432
       }
-      #postgresql:
-  #postgresqlUsername: my-username
-  #existingSecret: my-secret
-  #existingSecretPasswordKey: pgsql-password
-  #postgresqlServer: pgsql.example.com
-  #postgresqlDatabase: sonarDB
-  #service:
-    #port: 5432
       serviceAccount = {
-        enabled = false
+        enabled = true
         name = var.service_account_name
       }
       persistence = {
-        enabled = false
+        enabled = true
       }
       volumePermissions = {
         enabled = false
       }
-      master = {
-        labels = {
-          "app.kubernetes.io/part-of" = "sonarqube"
-        }
-        podLabels = {
-          "app.kubernetes.io/part-of" = "sonarqube"
-        }
-      }
+      #master = {
+       # labels = {
+        #  "app.kubernetes.io/part-of" = "sonarqube"
+        #}
+        #podLabels = {
+        #  "app.kubernetes.io/part-of" = "sonarqube"
+        #}
+      #}
     }
     ingress = {
       enabled = false
