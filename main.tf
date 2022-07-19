@@ -8,7 +8,7 @@ locals {
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
   values_file = "values-${var.server_name}.yaml"
   secret_dir    = "${local.tmp_dir}/secrets"
-
+  PostgresConfigmapName = var.PostgresConfigmap
   layer = "services"
   application_branch = "main"
   name = "sonarqube"
@@ -35,14 +35,14 @@ locals {
     }
     postgresql = {
       #enabled = false
-      #enabled = true
-      #postgresqlServer = 
-      #postgresqlDatabase = "sonarDB"
-      #postgresqlUsername = "sonarUser"
-      #postgresqlPassword = "sonarPass"
-      #service = {
-        #port = 5432
-      #}
+      enabled = true
+      postgresqlServer = "jdbc:postgresql://sonarqube-postgresql:5432/"
+      postgresqlDatabase = "sonarDB"
+      postgresqlUsername = "sonarUser"
+      postgresqlPassword = "sonarPass"
+      service = {
+        port = 5432
+      }
       #postgresql:
   #postgresqlUsername: my-username
   #existingSecret: my-secret
@@ -55,9 +55,9 @@ locals {
         enabled = false
         name = var.service_account_name
       }
-      #persistence = {
-       # enabled = false
-      #}
+      persistence = {
+        enabled = false
+      }
       volumePermissions = {
         enabled = false
       }
@@ -100,6 +100,12 @@ locals {
     persistence = {
       enabled = var.persistence
       storageClass = var.storage_class
+    }
+    
+    extraConfig = {
+      configmaps = [
+        local.PostgresConfigmapName
+      ]
     }
     postgresql = {
       enabled = !local.postgresql_external
