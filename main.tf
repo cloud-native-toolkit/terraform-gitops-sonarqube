@@ -8,7 +8,6 @@ locals {
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
   values_file = "values-${var.server_name}.yaml"
   secret_dir    = "${local.tmp_dir}/secrets"
-  PostgresConfigmapName = var.PostgresConfigmap
   layer = "services"
   application_branch = "main"
   name = "sonarqube"
@@ -94,11 +93,6 @@ locals {
       storageClass = var.storage_class
     }
     
-    extraConfig = {
-      configmaps = [
-        local.PostgresConfigmapName
-      ]
-    }
     postgresql = {
       enabled = !local.postgresql_external
       postgresqlServer = lookup(local.postgresql, "hostname", "")

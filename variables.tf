@@ -150,10 +150,5 @@ variable "cluster_version" {
   default     = ""
 }
 
-variable "PostgresConfigmap" {
-  type        = string
-  description = "config map used to store jdbc values for postgres"
-  default     = "external-sonarqube-opts"
-}
 
 
