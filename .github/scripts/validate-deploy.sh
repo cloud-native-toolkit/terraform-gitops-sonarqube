@@ -47,7 +47,6 @@ check_k8s_namespace "${NAMESPACE}"
 
 check_k8s_resource "${NAMESPACE}" "sealedsecret" "sonarqube-access"
 check_k8s_resource "${NAMESPACE}" "secret" "sonarqube-access"
-sleep 7m
-kubectl rollout status "statefulset/"${STATEFULSET} -n "${NAMESPACE}" || exit 1
+check_k8s_resource "${NAMESPACE}" "statefulset" "${STATEFULSET}"
 cd ..
 rm -rf .testrepo
