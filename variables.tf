@@ -102,7 +102,8 @@ variable "plugins" {
   description = "The list of plugins that will be installed on SonarQube"
   type        = list(string)
   default     = [
-    "https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar"
+    "https://github.com/checkstyle/sonar-checkstyle/releases/download/4.33/checkstyle-sonar-plugin-4.33.jar",
+    "https://github.com/AmadeusITGroup/sonar-stash/releases/download/1.6.0/sonar-stash-plugin-1.6.0.jar"
   ]
 }
 
@@ -148,3 +149,6 @@ variable "cluster_version" {
   description = "The cluster version"
   default     = ""
 }
+
+
+

@@ -4,6 +4,7 @@ module "dev_cluster" {
   server_url = var.server_url
   login_user = var.cluster_username
   login_password = var.cluster_password
+  ca_cert = var.cluster_ca_cert
   login_token = ""
 }
 

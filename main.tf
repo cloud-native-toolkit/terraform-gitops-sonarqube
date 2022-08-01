@@ -8,7 +8,6 @@ locals {
   service_url  = "http://sonarqube-sonarqube.${var.namespace}:9000"
   values_file = "values-${var.server_name}.yaml"
   secret_dir    = "${local.tmp_dir}/secrets"
-
   layer = "services"
   application_branch = "main"
   name = "sonarqube"
@@ -24,18 +23,19 @@ locals {
       pullPolicy = "Always"
     }
     persistence = {
-      enabled = false
+      enabled = true
     }
     serviceAccount = {
-      create = true
+      create = false
       name = var.service_account_name
     }
     podLabels = {
       "app.kubernetes.io/part-of" = "sonarqube"
     }
     postgresql = {
+      #enabled = false
       enabled = true
-      postgresqlServer = ""
+      postgresqlServer = "jdbc:postgresql://sonarqube-postgresql:5432/"
       postgresqlDatabase = "sonarDB"
       postgresqlUsername = "sonarUser"
       postgresqlPassword = "sonarPass"
@@ -43,23 +43,23 @@ locals {
         port = 5432
       }
       serviceAccount = {
-        enabled = false
+        enabled = true
         name = var.service_account_name
       }
       persistence = {
-        enabled = false
+        enabled = true
       }
       volumePermissions = {
         enabled = false
       }
-      master = {
-        labels = {
-          "app.kubernetes.io/part-of" = "sonarqube"
-        }
-        podLabels = {
-          "app.kubernetes.io/part-of" = "sonarqube"
-        }
-      }
+      #master = {
+       # labels = {
+        #  "app.kubernetes.io/part-of" = "sonarqube"
+        #}
+        #podLabels = {
+        #  "app.kubernetes.io/part-of" = "sonarqube"
+        #}
+      #}
     }
     ingress = {
       enabled = false
@@ -92,6 +92,7 @@ locals {
       enabled = var.persistence
       storageClass = var.storage_class
     }
+    
     postgresql = {
       enabled = !local.postgresql_external
       postgresqlServer = lookup(local.postgresql, "hostname", "")
