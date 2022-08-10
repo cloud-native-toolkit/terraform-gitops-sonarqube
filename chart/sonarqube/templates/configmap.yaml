@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-     name: external-sonarqube-opts
-data:
-     SONARQUBE_JDBC_USERNAME: {{ .Values.sonarqube.postgresql.postgresqlUsername }}
-     SONARQUBE_JDBC_URL: {{ .Values.sonarqube.postgresql.postgresqlServer }}{{ .Values.sonarqube.postgresql.postgresqlDatabase }}

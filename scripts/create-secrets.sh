@@ -20,10 +20,12 @@ if [[ -z "${SERVICE_URL}" ]] || [[ -z "${ADMIN_PASSWORD}" ]] ; then
   exit 1
 fi
 
-kubectl create secret generic sonarqube-access \
+kubectl create secret generic -n "${NAMESPACE}" sonarqube-access \
   --from-literal="SONARQUBE_URL=${SERVICE_URL}" \
   --from-literal="SONARQUBE_PASSWORD=${ADMIN_PASSWORD}" \
   --from-literal="SONARQUBE_USER=admin" \
-  -n "${NAMESPACE}" \
   --dry-run=client \
-  --output=yaml > "${DEST_DIR}/sonarqube-access.yaml"
+  -o yaml | \
+kubectl label --local=true -f - --dry-run=client -o yaml \
+  group=cloud-native-toolkit \
+  grouping=garage-cloud-native-toolkit > "${DEST_DIR}/sonarqube-access.yaml"
