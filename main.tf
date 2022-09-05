@@ -10,6 +10,7 @@ locals {
   secret_dir    = "${local.tmp_dir}/secrets"
   layer = "services"
   application_branch = "main"
+  type = "base"
   name = "sonarqube"
   path = "sonarqube"
   admin_password = "admin"
@@ -201,7 +202,7 @@ module seal_secrets {
 }
 
 module "service_account" {
-  source = "github.com/cloud-native-toolkit/terraform-gitops-service-account.git"
+  source = "github.com/cloud-native-toolkit/terraform-gitops-service-account.git?ref=v1.9.0"
 
   gitops_config = var.gitops_config
   git_credentials = var.git_credentials
@@ -239,7 +240,7 @@ module "service_account" {
 module setup_group_scc {
   depends_on = [module.service_account]
 
-  source = "github.com/cloud-native-toolkit/terraform-gitops-sccs.git"
+  source = "github.com/cloud-native-toolkit/terraform-gitops-sccs.git?ref=v1.4.1"
 
   gitops_config = var.gitops_config
   git_credentials = var.git_credentials
@@ -250,38 +251,16 @@ module setup_group_scc {
   group = true
 }
 
+resource gitops_module module {
+  depends_on = [null_resource.create_yaml]
 
-resource null_resource setup_gitops {
-  depends_on = [null_resource.create_yaml,module.service_account, module.seal_secrets]
-
-  triggers = {
-    name = local.name
-    namespace = var.namespace
-    yaml_dir = local.yaml_dir
-    server_name = var.server_name
-    layer = local.layer
-    type = "base"
-    git_credentials = yamlencode(var.git_credentials)
-    gitops_config   = yamlencode(var.gitops_config)
-    bin_dir = local.bin_dir
-  }
-
-  provisioner "local-exec" {
-    command = "${self.triggers.bin_dir}/igc gitops-module '${self.triggers.name}' -n '${self.triggers.namespace}' --contentDir '${self.triggers.yaml_dir}' --serverName '${self.triggers.server_name}' -l '${self.triggers.layer}' --type '${self.triggers.type}' --cascadingDelete=false"
-
-    environment = {
-      GIT_CREDENTIALS = nonsensitive(self.triggers.git_credentials)
-      GITOPS_CONFIG   = self.triggers.gitops_config
-    }
-  }
-
-  provisioner "local-exec" {
-    when = destroy
-    command = "${self.triggers.bin_dir}/igc gitops-module '${self.triggers.name}' -n '${self.triggers.namespace}' --delete --contentDir '${self.triggers.yaml_dir}' --serverName '${self.triggers.server_name}' -l '${self.triggers.layer}' --type '${self.triggers.type}'"
-
-    environment = {
-      GIT_CREDENTIALS = nonsensitive(self.triggers.git_credentials)
-      GITOPS_CONFIG   = self.triggers.gitops_config
-    }
-  }
+  name = local.name
+  namespace = var.namespace
+  content_dir = local.yaml_dir
+  server_name = var.server_name
+  layer = local.layer
+  type = local.type
+  branch = local.application_branch
+  config = yamlencode(var.gitops_config)
+  credentials = yamlencode(var.git_credentials)
 }
