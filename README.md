@@ -39,4 +39,3 @@ module "gitops_sonarqube" {
   server_name              = module.gitops.server_name
 }
 ```
-
