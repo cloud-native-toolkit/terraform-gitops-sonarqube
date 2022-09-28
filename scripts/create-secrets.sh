@@ -27,5 +27,5 @@ kubectl create secret generic -n "${NAMESPACE}" sonarqube-access \
   --dry-run=client \
   -o yaml | \
 kubectl label --local=true -f - --dry-run=client -o yaml \
-  group=cloud-native-toolkit \
+  group=catalyst-tools \
   grouping=garage-cloud-native-toolkit > "${DEST_DIR}/sonarqube-access.yaml"
